@@ -1,0 +1,73 @@
+
+---
+
+### **Rutas por Entidad**
+
+#### **1. Rutas para Pasajeros**
+- **`GET /pasajeros`**: Listar todos los pasajeros.
+- **`GET /pasajeros/{id}`**: Obtener detalles de un pasajero específico.
+- **`POST /pasajeros`**: Crear un nuevo pasajero.
+- **`PUT /pasajeros/{id}`**: Actualizar la información de un pasajero.
+- **`DELETE /pasajeros/{id}`**: Eliminar un pasajero.
+
+---
+
+#### **2. Rutas para Vuelos**
+- **`GET /vuelos`**: Listar todos los vuelos.
+- **`GET /vuelos/{id}`**: Obtener detalles de un vuelo específico.
+- **`POST /vuelos`**: Crear un nuevo vuelo.
+- **`PUT /vuelos/{id}`**: Actualizar la información de un vuelo.
+- **`DELETE /vuelos/{id}`**: Eliminar un vuelo.
+
+---
+
+#### **3. Rutas para Reservas**
+- **`GET /reservas`**: Listar todas las reservas.
+- **`GET /reservas/{id}`**: Obtener detalles de una reserva específica.
+- **`POST /reservas`**: Crear una nueva reserva.
+- **`PUT /reservas/{id}`**: Actualizar la información de una reserva.
+- **`DELETE /reservas/{id}`**: Eliminar una reserva.
+
+---
+
+#### **4. Rutas para Aviones**
+- **`GET /aviones`**: Listar todos los aviones.
+- **`GET /aviones/{id}`**: Obtener detalles de un avión específico.
+- **`POST /aviones`**: Crear un nuevo avión.
+- **`PUT /aviones/{id}`**: Actualizar la información de un avión.
+- **`DELETE /aviones/{id}`**: Eliminar un avión.
+
+---
+
+#### **5. Rutas para Tripulación**
+- **`GET /tripulacion`**: Listar todos los miembros de la tripulación.
+- **`GET /tripulacion/{id}`**: Obtener detalles de un miembro de la tripulación.
+- **`POST /tripulacion`**: Crear un nuevo miembro de la tripulación.
+- **`PUT /tripulacion/{id}`**: Actualizar información de un miembro de la tripulación.
+- **`DELETE /tripulacion/{id}`**: Eliminar un miembro de la tripulación.
+
+---
+
+### **Rutas Relacionales (Opcionales)**
+
+1. **Pasajeros en un Vuelo**  
+   - **`GET /vuelos/{id}/pasajeros`**: Listar todos los pasajeros de un vuelo específico.
+
+2. **Reservas de un Pasajero**  
+   - **`GET /pasajeros/{id}/reservas`**: Listar todas las reservas de un pasajero.
+
+3. **Vuelos Operados por un Avión**  
+   - **`GET /aviones/{id}/vuelos`**: Listar los vuelos asignados a un avión.
+
+4. **Tripulación de un Vuelo**  
+   - **`GET /vuelos/{id}/tripulacion`**: Listar la tripulación asignada a un vuelo.
+
+5. **Asientos Libres en un Vuelo**
+   - **`GET /vuelos/{id}/asientos-libres`**: Listar los asientos disponibles en un vuelo específico.
+
+---
+
+### **¿Cómo continuar?**
+1. **Define la Lógica de Negocio**: Usa los servicios para conectar estas rutas con tu base de datos.
+2. **Agrega Validaciones**: Asegúrate de validar entradas (por ejemplo, que el ID existe antes de procesar una solicitud).
+3. **Pruebas**: Crea casos de prueba para cada endpoint y escenario posible.
