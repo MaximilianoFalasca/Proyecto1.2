@@ -8,7 +8,6 @@ from pathlib import Path
 
 # Ruta absoluta al .env dentro de config
 env_path = Path(__file__).parent / "config" / ".env"
-
 load_dotenv(dotenv_path=env_path)
 
 # Inicializar la base de datos antes de iniciar la aplicación
@@ -21,10 +20,12 @@ Tripulacion.inicializar_db()
 Avion.inicializar_db()
 Aeropuerto.inicializar_db()
 Vuelo.inicializar_db()
-       
+
 # Inicializar la aplicación Flask
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"])
+
+# CORS abierto para cualquier origen (puedo poner un dominio en producción)
+CORS(app)
 
 # Registrar el Blueprint
 app.register_blueprint(Pasajero_routes)
@@ -36,5 +37,4 @@ app.register_blueprint(Tarjeta_routes)
 app.register_blueprint(Asiento_routes)
 app.register_blueprint(Aeropuerto_routes)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# No arranco con app.run porque Render usará gunicorn para producción
