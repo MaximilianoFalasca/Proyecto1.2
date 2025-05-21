@@ -1,12 +1,11 @@
-import sqlite3
+from conexion import get_connection
 from . import Asiento, Vuelo
 
 class Persona:
-    db_path = "C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db"
     
     @classmethod
     def inicializar_db(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS persona(
@@ -28,13 +27,13 @@ class Persona:
     
     @classmethod
     def obtenerPersona(cls, dni):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                         SELECT p.dni, p.cuil, p.nombre, p.apellido, a.numeroTarjeta 
                         FROM persona p
                             LEFT JOIN asociado a ON (a.dni = p.dni)
-                        WHERE p.dni = ?
+                        WHERE p.dni = %s
                     """,(dni,)
                 )
             respuesta = cursor.fetchone()
@@ -66,7 +65,7 @@ class Persona:
         mensaje=mensaje[:-2]
         mensaje += f" WHERE dni = '{dni}'"
         
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(mensaje)
             conn.commit()
@@ -79,9 +78,9 @@ class Persona:
         self.numeroTarjeta=numeroTarjeta 
         
     def guardar(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT nombre, apellido FROM persona WHERE dni = ?",(self.dni,))
+            cursor.execute("SELECT nombre, apellido FROM persona WHERE dni = %s",(self.dni,))
 
             resultado = cursor.fetchone()  # Cambiar a fetchone para obtener una sola fila
         
@@ -91,27 +90,27 @@ class Persona:
                     raise ValueError("Dni registrado con otros datos")
             else:
 
-                cursor.execute("INSERT INTO persona (dni, cuil, nombre, apellido) VALUES (?,?,?,?)",(self.dni, self.cuil,self.nombre,self.apellido))
+                cursor.execute("INSERT INTO persona (dni, cuil, nombre, apellido) VALUES (%s,%s,%s,%s)",(self.dni, self.cuil,self.nombre,self.apellido))
                 
                 if(self.numeroTarjeta!=None):
-                    cursor.execute(f"INSERT INTO asociado (dni, numeroTarjeta) VALUES (?,?)", (self.dni, self.numeroTarjeta))
+                    cursor.execute("INSERT INTO asociado (dni, numeroTarjeta) VALUES (%s,%s)", (self.dni, self.numeroTarjeta))
                 
                 conn.commit()
             
     def agregarTarjeta(self, numeroTarjeta):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             
-            cursor.execute("SELECT 1 FROM beneficio WHERE nroTarjeta = '?'",(numeroTarjeta,))
+            cursor.execute("SELECT 1 FROM beneficio WHERE nroTarjeta = '%s'",(numeroTarjeta,))
             resultado = cursor.fetchone()
             
             if resultado:
                 raise ValueError("No existe una tarjeta con ese nombre")
             
             if(self.numeroTarjeta==None):
-                cursor.execute("INSERT INTO asociado (dni, numeroTarjeta) VALUES (?,?)", (self.dni, numeroTarjeta))
+                cursor.execute("INSERT INTO asociado (dni, numeroTarjeta) VALUES (%s,%s)", (self.dni, numeroTarjeta))
             else:
-                cursor.execute(f"UPDATE asociado SET numeroTarjeta = {numeroTarjeta} WHERE dni = {self.dni}")
+                cursor.execute("UPDATE asociado SET numeroTarjeta = %s WHERE dni = %s",(numeroTarjeta, self.dni))
             conn.commit()
             self.numeroTarjeta=numeroTarjeta
         

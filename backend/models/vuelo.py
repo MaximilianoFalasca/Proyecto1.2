@@ -1,18 +1,17 @@
-import sqlite3
 from datetime import datetime
+from conexion import get_connection
 
 class Vuelo:
-    db_path = "C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db"
     
     @classmethod
     def inicializar_db(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS vuelo(
                     nro INTEGER NOT NULL,
-                    fechaYHoraSalida DATE NOT NULL,
-                    fechaYHoraLlegada DATE NOT NULL,
+                    fechaYHoraSalida TIMESTAMP NOT NULL,
+                    fechaYHoraLlegada TIMESTAMP NOT NULL,
                     matricula INTEGER NOT NULL,
                     codigoAeropuertoSalida INTEGER NOT NULL,
                     codigoAeropuertoLlegada INTEGER NOT NULL,
@@ -26,9 +25,9 @@ class Vuelo:
             
     @classmethod
     def obtenerVuelo(cls, nro, fechaYHoraSalida):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM vuelo WHERE nro = (?) and fechaYHoraSalida = (?)",(nro,fechaYHoraSalida))
+            cursor.execute("SELECT * FROM vuelo WHERE nro = (%s) and fechaYHoraSalida = (%s)",(nro,fechaYHoraSalida))
             respuesta = cursor.fetchone()
             
             if not (respuesta):
@@ -47,7 +46,7 @@ class Vuelo:
     
     @classmethod
     def obtenerTodos(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM vuelo")
             vuelos = cursor.fetchall()
@@ -68,9 +67,9 @@ class Vuelo:
             
     @classmethod
     def eliminarVuelo(cls, nro, fechaYHoraSalida):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM vuelo WHERE nro = (?) and fechaYHoraSalida = (?)",(nro, fechaYHoraSalida))
+            cursor.execute("DELETE FROM vuelo WHERE nro = (%s) and fechaYHoraSalida = (%s)",(nro, fechaYHoraSalida))
             conn.commit()
     
     def __init__(self, nro, fechaYHoraSalida, fechaYHoraLlegada, matricula, codigoAeropuertoSalida, codigoAeropuertoLlegada):
@@ -82,14 +81,26 @@ class Vuelo:
         self.codigoAeropuertoLlegada = codigoAeropuertoLlegada
     
     def guardar(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO vuelo (nro, fechaYHoraSalida, fechaYHoraLlegada, matricula, codigoAeropuertoSalida, codigoAeropuertoLlegada) VALUES (?,?,?,?,?,?)",(self.nro, self.fechaYHoraSalida, self.fechaYHoraLlegada, self.matricula, self.codigoAeropuertoSalida, self.codigoAeropuertoLlegada))
+            cursor.execute("""
+                INSERT INTO vuelo 
+                    (nro, fechaYHoraSalida, fechaYHoraLlegada, matricula, codigoAeropuertoSalida, codigoAeropuertoLlegada) 
+                VALUES (%s,%s,%s,%s,%s,%s)""",
+            (
+                self.nro, 
+                self.fechaYHoraSalida, 
+                self.fechaYHoraLlegada, 
+                self.matricula, 
+                self.codigoAeropuertoSalida, 
+                self.codigoAeropuertoLlegada)
+            )
             conn.commit()
             
+    # esto no esta obteniendo los asientos??
     def obtenerAsientos(self):
         from .avion import Avion
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT a.matricula, a.fechaFabricacion, a.capacidad, a.nombreModelo, a.nombreMarca

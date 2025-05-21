@@ -1,11 +1,10 @@
-import sqlite3
+from conexion import get_connection
 
 class TarjetaBeneficio:
-    db_path = "C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db"
 
     @classmethod
     def inicializar_bd(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS beneficio (
@@ -17,7 +16,7 @@ class TarjetaBeneficio:
             
     @classmethod
     def obtenerTodos(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM beneficio")
             filas = cursor.fetchall()
@@ -26,28 +25,28 @@ class TarjetaBeneficio:
         
     @classmethod
     def obtener_por_nro_tarjeta(cls, nroTarjeta):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(f"""
+            cursor.execute("""
                 SELECT *
                 FROM beneficio b
-                WHERE b.nroTarjeta = '{nroTarjeta}'
-            """)
+                WHERE b.nroTarjeta = '%s'
+            """,(nroTarjeta,))
             beneficio = cursor.fetchone()
             return cls(nroTarjeta=beneficio[0], puntos=beneficio[1])
         
     @classmethod
     def actualizarTarjeta(cls, nroTarjeta, puntos):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("UPDATE beneficio SET puntos = ? WHERE nroTarjeta = ?", (puntos, nroTarjeta))
+            cursor.execute("UPDATE beneficio SET puntos = %s WHERE nroTarjeta = %s", (puntos, nroTarjeta))
             conn.commit()
 
     @classmethod
     def eliminarTarjeta(cls, nroTarjeta):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM beneficio WHERE nroTarjeta = ?", (nroTarjeta,))
+            cursor.execute("DELETE FROM beneficio WHERE nroTarjeta = %s", (nroTarjeta,))
             conn.commit()
 
     def __init__(self, nroTarjeta, puntos=None):
@@ -58,9 +57,9 @@ class TarjetaBeneficio:
             self.puntos=puntos
 
     def guardar(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO beneficio (nroTarjeta, puntos) VALUES (? ,?)",(self.nroTarjeta,self.puntos))
+            cursor.execute("INSERT INTO beneficio (nroTarjeta, puntos) VALUES (%s ,%s)",(self.nroTarjeta,self.puntos))
             conn.commit()
     
     def calcular_descuento(self, monto):

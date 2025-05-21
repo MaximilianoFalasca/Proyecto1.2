@@ -1,11 +1,10 @@
-import sqlite3
+from conexion import get_connection
 
 class Avion:
-    db_path = "C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db"
     
     @classmethod
     def inicializar_db(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS avion(
@@ -21,16 +20,16 @@ class Avion:
     
     @classmethod
     def eliminarAvion(cls, matricula):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM avion WHERE matricula = (?)",(matricula,))
+            cursor.execute("DELETE FROM avion WHERE matricula = (%s)",(matricula,))
             conn.commit()
     
     @classmethod
     def obtenerAvion(cls, matricula):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(" SELECT * FROM avion WHERE matricula = (?)",(matricula,))
+            cursor.execute(" SELECT * FROM avion WHERE matricula = (%s)",(matricula,))
             respuesta = cursor.fetchone()
             
             if not (respuesta):
@@ -49,7 +48,7 @@ class Avion:
     
     @classmethod
     def obtenerTodos(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM avion")
             respuesta = cursor.fetchall()
@@ -83,7 +82,7 @@ class Avion:
         mensaje = mensaje[:-2]
         mensaje += f" WHERE matricula = '{matricula}'"
         
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(mensaje)
             conn.commit()
@@ -98,14 +97,14 @@ class Avion:
         self.kilometros = 0.0
     
     def guardar(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO avion (matricula, capacidad, nombreModelo, fechaFabricacion, nombreMarca, kilometros) VALUES (?,?,?,?,?,?)",(self.matricula, self.capacidad,  self.nombreModelo, self.fechaFabricacion, self.nombreMarca, self.kilometros))
+            cursor.execute("INSERT INTO avion (matricula, capacidad, nombreModelo, fechaFabricacion, nombreMarca, kilometros) VALUES (%s,%s,%s,%s,%s,%s)",(self.matricula, self.capacidad,  self.nombreModelo, self.fechaFabricacion, self.nombreMarca, self.kilometros))
             conn.commit()
             
     def obtenerAsientos(self):
         from .asiento import Asiento
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             # (self, numero, matricula, precio)
             cursor.execute("""

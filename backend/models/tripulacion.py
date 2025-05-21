@@ -1,21 +1,20 @@
-import sqlite3
 from .persona import Persona
+from conexion import get_connection
 
+#tengo qeu seguir revisando todo bien
 class Tripulacion(Persona):
-    db_path='C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db'
-    
     @classmethod
     def inicializar_db(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tripulacion(
-                    legajo INTEGER PRIMARY KEY AUTOINCREMENT,
+                    legajo SERIAL PRIMARY KEY,
                     dni INTEGER UNIQUE NOT NULL,
                     rol TEXT NOT NULL,
                     horasAcumuladas REAL NOT NULL,
                     nroVuelo INTEGER NOT NULL,
-                    fechaYHoraSalida DATE NOT NULL,
+                    fechaYHoraSalida TIMESTAMP NOT NULL,
                     FOREIGN KEY (nroVuelo, fechaYHoraSalida) REFERENCES vuelo(nro, fechaYHoraSalida)
                 )               
             """)
@@ -23,16 +22,20 @@ class Tripulacion(Persona):
             
     @classmethod
     def eliminarTripulacion(cls, legajo):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM tripulacion WHERE legajo = (?)",(legajo,))
+            cursor.execute("DELETE FROM tripulacion WHERE legajo = (%s)",(legajo,))
             conn.commit()
             
     @classmethod
     def obtenerTripulacion(cls, legajo):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM tripulacion t INNER JOIN persona p ON (p.dni = t.dni) WHERE t.legajo = (?)",(legajo,))
+            cursor.execute("""
+                SELECT * FROM tripulacion t 
+                INNER JOIN persona p ON (p.dni = t.dni)     
+                WHERE t.legajo = %s
+            """,(legajo,))
             respuesta = cursor.fetchone()
             
             if not (respuesta):
@@ -53,7 +56,7 @@ class Tripulacion(Persona):
             
     @classmethod
     def obtenerTodos(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT * 
@@ -80,7 +83,8 @@ class Tripulacion(Persona):
             
             return tripulacion
     
-    # al finalizar un vuelo se acumulan las horas y se deja el nroVuelo, fechaYHoraSalida y rol vacios
+    # 1- hay que fixearlo por seguridad
+    # 2- al finalizar un vuelo se acumulan las horas y se deja el nroVuelo, fechaYHoraSalida y rol vacios
     # hay que ver eso 
     @classmethod
     def actualizarTripulacion(cls, dni, **datos):
@@ -99,11 +103,12 @@ class Tripulacion(Persona):
                     raise ValueError(f"El parametro {campo} no es un campo actualizable")
 
         mensaje = mensaje[:-2]
-        mensaje += f" WHERE dni = {dni}"
+        mensaje += f" WHERE dni = $s"
         
-        with sqlite3.connect(cls.db_path) as conn:
+        
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(mensaje)
+            cursor.execute(mensaje,(dni,))
             conn.commit()
             
         Persona.actualizarPersona(dni,datos_a_actualizar_padre)
@@ -121,8 +126,12 @@ class Tripulacion(Persona):
         self.fechaYHoraSalida = fechaYHoraSalida
     
     def guardar(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(f"INSERT tripulacion (dni, horasAcumuladas, nroVuelo, fechaYHoraSalida, rol) VALUE (?,?,?,?,?)",(self.dni, self.horasAcumuladas, self.nroVuelo, self.fechaYHoraSalida, self.rol))
-            self.legajo=cursor.lastrowid
+            cursor.execute("""
+                INSERT INTO tripulacion (dni, horasAcumuladas, nroVuelo, fechaYHoraSalida, rol)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING legajo
+            """, (self.dni, self.horasAcumuladas, self.nroVuelo, self.fechaYHoraSalida, self.rol))
+            self.legajo = cursor.fetchone()[0]
             conn.commit()

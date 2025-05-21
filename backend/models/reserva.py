@@ -1,7 +1,7 @@
-import sqlite3
 from .estados import validarEstado
 from .asiento import Asiento
 import datetime
+from conexion import get_connection
 
 # tengo lio con los estados, tengo que revisar bien porque cada dia pensaba dif, hay que documentar sobre como va a funcionar
 
@@ -14,18 +14,17 @@ import datetime
 # podemos mirar los asientos ocupados como todos aquellos que tienen una relacion con una reserva y ademas el estado de la misma es paid. Si es pending el asiento tiene una relacion
 # con ese asiento pero no esta reservado
 class Reserva:
-    db_path = "C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db"
 
     @classmethod
     def inicializar_bd(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS reserva(
-                    numero INTEGER PRIMARY KEY AUTOINCREMENT,
+                    numero SERIAL PRIMARY KEY,
                     numeroVuelo INTEGER NOT NULL,
-                    fechaYHoraSalida DATE NOT NULL,
-                    fecha DATE NOT NULL,
+                    fechaYHoraSalida TIMESTAMP NOT NULL,
+                    fecha TIMESTAMP NOT NULL,
                     precio REAL NOT NULL,
                     dni INTEGER NOT NULL,
                     FOREIGN KEY (dni) REFERENCES pasajero(dni),
@@ -38,7 +37,7 @@ class Reserva:
                 CREATE TABLE IF NOT EXISTS esta(
                     numeroReserva INTEGER NOT NULL,
                     nombreEstado INTEGER NOT NULL,
-                    fechaInicio Date NOT NULL,
+                    fechaInicio TIMESTAMP NOT NULL,
                     fechaFin DATE,
                     PRIMARY KEY (numeroReserva, nombreEstado),
                     FOREIGN KEY (numeroReserva) REFERENCES reserva(numero),
@@ -49,7 +48,7 @@ class Reserva:
             
     @classmethod
     def obtenerTodos(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             
             cursor.execute("""
@@ -89,14 +88,14 @@ class Reserva:
     # igual en la db los asientos pretendidos a reservar y se lo tendria que retornar
     @classmethod
     def obtenerReserva(cls, numero):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             
             cursor.execute("""
                     SELECT r.fecha, e.nombreEstado, r.dni, r.numeroVuelo, r.fechaYHoraSalida
                     FROM reserva r
                         INNER JOIN esta e ON (e.numeroReserva = r.numero)
-                    WHERE r.numero = (?)
+                    WHERE r.numero = (%s)
                 """,(numero,)
             )
             respuesta = cursor.fetchone()
@@ -121,17 +120,17 @@ class Reserva:
         
     @classmethod
     def eliminarReserva(cls,numero):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM reserva WHERE numero = ?",(numero, ))
-            cursor.execute("DELETE FROM ocupa WHERE numeroReserva = ?",(numero, ))
+            cursor.execute("DELETE FROM reserva WHERE numero = %s",(numero, ))
+            cursor.execute("DELETE FROM ocupa WHERE numeroReserva = %s",(numero, ))
             conn.commit()
     
     def _inicializarEstado(self):
         if(self.numero!=None):
-            with sqlite3.connect(self.db_path) as conn:
+            with get_connection() as conn:
                 cursor=conn.cursor()
-                cursor.execute("INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) VALUES (?,?,?,?)",(self.numero, 'Pending', self.fecha, None))
+                cursor.execute("INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) VALUES (%s,%s,%s,%s)",(self.numero, 'Pending', self.fecha, None))
                 conn.commit()
                 self.estado='Pending'
         else:
@@ -157,9 +156,9 @@ class Reserva:
                 if self.numero != None and not (asiento.estaRelacionadoCon(self.numero)):
                     asiento.relacionarConReserva(self.numero)
                 if(self.numero != None):
-                    with sqlite3.connect(self.db_path) as conn:
+                    with get_connection() as conn:
                         cursor = conn.cursor()
-                        cursor.execute("UPDATE reserva SET precio = (?) WHERE numero = (?)",(self.precio, self.numero))
+                        cursor.execute("UPDATE reserva SET precio = (%s) WHERE numero = (%s)",(self.precio, self.numero))
                         conn.commit()
     
     # para cuando una persona este cambiando los datos de la reserva mientras esta en pending
@@ -191,10 +190,14 @@ class Reserva:
     # tengo que verificar que no se haga varias veces
     def guardar(self):
         if(self.numero==None):
-            with sqlite3.connect(self.db_path) as conn:
+            with get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO reserva (dni, fecha, precio, numeroVuelo, fechaYHoraSalida) VALUES (?,?,?,?,?)", (self.dni, self.fecha, self.precio, self.numeroVuelo, self.fechaYHoraSalida))
-                self.numero = cursor.lastrowid
+                cursor.execute("""
+                    INSERT INTO reserva (dni, fecha, precio, numeroVuelo, fechaYHoraSalida) 
+                    VALUES (%s,%s,%s,%s,%s) RETURNING numero""", 
+                    (self.dni, self.fecha, self.precio, self.numeroVuelo, self.fechaYHoraSalida)
+                )
+                self.numero = cursor.fetchone()[0]
                 # esto no se hace todavia porque no se confirmo el pago, estamos en pending todavia
                 # for asiento in self._asientos:
                 #     if isinstance(asiento, Asiento):
@@ -222,14 +225,13 @@ class Reserva:
         if(self.estado=='Cancelled'):
             raise ValueError("La reserva se encuentra cancelada, no se puede modificar su estado")
         
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             
             fecha = datetime.datetime.now()
-            fecha_sql = f"{fecha.year}-{fecha.month}-{fecha.day}"
             
-            cursor.execute(f"UPDATE esta SET fechaFin = ? WHERE numeroReserva = ? and nombreEstado = ?",(fecha_sql, self.numero, self.estado))
-            cursor.execute("INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) VALUES (?,?,?,?)", (self.numero, estado, fecha_sql, None))
+            cursor.execute(f"UPDATE esta SET fechaFin = %s WHERE numeroReserva = %s and nombreEstado = %s",(fecha, self.numero, self.estado))
+            cursor.execute("INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) VALUES (%s,%s,%s,%s)", (self.numero, estado, fecha, None))
             
             conn.commit()
             

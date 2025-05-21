@@ -1,12 +1,15 @@
 from flask import Flask
-import sqlite3
 from datetime import datetime
 from routes import *
 from models import * 
 from flask_cors import CORS
+from dotenv import load_dotenv
+from pathlib import Path
 
-# Registrar el adaptador para datetime antes de inicializar la aplicación
-sqlite3.register_adapter(datetime, lambda d: d.strftime('%Y-%m-%d %H:%M:%S'))
+# Ruta absoluta al .env dentro de config
+env_path = Path(__file__).parent / "config" / ".env"
+
+load_dotenv(dotenv_path=env_path)
 
 # Inicializar la base de datos antes de iniciar la aplicación
 Asiento.inicializar_db()

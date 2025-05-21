@@ -1,15 +1,13 @@
-import sqlite3
+from conexion import get_connection
 from .persona import Persona
 from .vuelo import Vuelo
-from datetime import datetime
 
 class Pasajero(Persona):
-    db_path = "C:/Users/maxi/Desktop/python/Proyecto1/backend/database/aerolineasArgentinas.db"
     
     @classmethod
     def inicializar_db(cls):
         super().inicializar_db()
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pasajero(
@@ -23,22 +21,22 @@ class Pasajero(Persona):
             
     @classmethod
     def eliminarPasajero(cls, dni):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM pasajero WHERE dni = (?)",(dni,))
-            cursor.execute("DELETE FROM asociado WHERE dni = (?)",(dni,))
+            cursor.execute("DELETE FROM pasajero WHERE dni = (%s)",(dni,))
+            cursor.execute("DELETE FROM asociado WHERE dni = (%s)",(dni,))
             conn.commit()
             
     @classmethod
     def obtenerPasajero(cls, dni):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT p.dni, p.telefono, p.mail, a.numeroTarjeta, pe.cuil, pe.nombre, pe.apellido 
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE p.dni = (?)
+                WHERE p.dni = (%s)
             """,(dni,))
             respuesta = cursor.fetchone()
             
@@ -54,7 +52,7 @@ class Pasajero(Persona):
             
     @classmethod
     def obtenerTodos(cls):
-        with sqlite3.connect(cls.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT p.dni, p.telefono, p.mail, a.numeroTarjeta, pe.cuil, pe.nombre, pe.apellido 
@@ -99,7 +97,7 @@ class Pasajero(Persona):
             mensaje = mensaje[:-2]
             mensaje += f" WHERE dni = '{dni}'"
         
-            with sqlite3.connect(cls.db_path) as conn:
+            with get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(mensaje)
                 conn.commit()
@@ -118,23 +116,23 @@ class Pasajero(Persona):
         
     def guardar(self):
         super().guardar()
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
             
-            cursor.execute(f"INSERT INTO pasajero (dni, telefono, mail) VALUES (?,?,?)",
+            cursor.execute("INSERT INTO pasajero (dni, telefono, mail) VALUES (%s,%s,%s)",
                            (self.dni, self.telefono, self.mail))
 
             conn.commit()
             
     def puedeVolar(self, fechaSalida, fechaLlegada):
-        with sqlite3.connect(self.db_path) as conn:
+        with get_connection() as conn:
             cursor = conn.cursor()
 
             cursor.execute("""
                 SELECT 1
                 FROM reserva r 
                     INNER JOIN vuelo v ON (r.numeroVuelo = v.nro AND r.fechaYHoraSalida = v.fechaYHoraSalida)
-                WHERE r.dni = ? AND v.fechaYHoraSalida > DATETIME('now') AND (v.fechaYHoraSalida < ? OR v.fechaYHoraLlegada > ?)
+                WHERE r.dni = %s AND v.fechaYHoraSalida > NOW()  AND (v.fechaYHoraSalida < %s OR v.fechaYHoraLlegada > %s)
             """,(self.dni, fechaLlegada, fechaSalida))
             respuesta = cursor.fetchone()
             
