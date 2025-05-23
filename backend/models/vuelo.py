@@ -1,5 +1,5 @@
 from datetime import datetime
-from conexion import get_connection
+from .conexion import get_connection
 
 class Vuelo:
     

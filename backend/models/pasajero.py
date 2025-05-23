@@ -1,4 +1,4 @@
-from conexion import get_connection
+from .conexion import get_connection
 from .persona import Persona
 from .vuelo import Vuelo
 

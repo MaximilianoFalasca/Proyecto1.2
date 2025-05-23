@@ -1,7 +1,7 @@
 from .estados import validarEstado
 from .asiento import Asiento
 import datetime
-from conexion import get_connection
+from .conexion import get_connection
 
 # tengo lio con los estados, tengo que revisar bien porque cada dia pensaba dif, hay que documentar sobre como va a funcionar
 

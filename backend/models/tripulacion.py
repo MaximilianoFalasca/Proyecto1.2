@@ -1,5 +1,5 @@
 from .persona import Persona
-from conexion import get_connection
+from .conexion import get_connection
 
 #tengo qeu seguir revisando todo bien
 class Tripulacion(Persona):
