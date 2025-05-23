@@ -38,18 +38,19 @@ class Tripulacion(Persona):
             """,(legajo,))
             respuesta = cursor.fetchone()
             
-            if not (respuesta):
-                raise ValueError(f"No existe el miembro de la tripulacion con legajo {legajo}")
-            
+            if not respuesta or len(respuesta)<9:
+                return None  
+
             tripulacion = cls(
-                dni=respuesta[1], 
-                nombre=respuesta[6], 
-                apellido=respuesta[7],
+                dni=respuesta[1],
+                nombre=respuesta[7],
+                apellido=respuesta[8],
+                cuil=respuesta[6],
                 nroVuelo=respuesta[4],
                 fechaYHoraSalida=respuesta[5],
-                rol=respuesta[2], 
-                numeroTarjeta=respuesta[8] if len(respuesta)>8 else None,
-                horasAcumuladas = respuesta[3],
+                rol=respuesta[2],
+                numeroTarjeta=respuesta[9] if len(respuesta) > 9 else None,
+                horasAcumuladas=respuesta[3],
             )
             tripulacion.legajo = respuesta[0]
             return tripulacion
@@ -67,19 +68,21 @@ class Tripulacion(Persona):
             tripulacion = []
             
             for f in filas:
-                t = cls(
-                    dni=f[1], 
-                    nombre=f[6], 
-                    apellido=f[7],
-                    nroVuelo=f[4],
-                    fechaYHoraSalida=f[5],
-                    rol=f[2], 
-                    numeroTarjeta=f[8] if len(f)>8 else None,
-                    horasAcumuladas = f[3],
-                )
-                t.legajo = f[0]
-                
-                tripulacion.append(t)
+                if f and len(f)>=9:
+                    t = cls(
+                        dni=f[1], 
+                        nombre=f[7],
+                        apellido=f[8],
+                        cuil=f[6],
+                        nroVuelo=f[4],
+                        fechaYHoraSalida=f[5],
+                        rol=f[2], 
+                        numeroTarjeta=f[9] if len(f)>9 else None,
+                        horasAcumuladas = f[3],
+                    )
+                    t.legajo = f[0]
+                    
+                    tripulacion.append(t)
             
             return tripulacion
     
@@ -133,5 +136,6 @@ class Tripulacion(Persona):
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING legajo
             """, (self.dni, self.horasAcumuladas, self.nroVuelo, self.fechaYHoraSalida, self.rol))
-            self.legajo = cursor.fetchone()[0]
+            row = cursor.fetchone()
+            self.legajo =  row if row is not None else None
             conn.commit()

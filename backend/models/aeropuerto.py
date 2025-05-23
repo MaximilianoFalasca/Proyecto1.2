@@ -92,4 +92,8 @@ class Aeropuerto:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO Aeropuerto (codigo, nombre, nombreCiudad, nombrePaiz) VALUES (%s,%s,%s,%s) RETURNING codigo",(self.codigo, self.nombre,  self.nombreCiudad, self.nombrePaiz))
             conn.commit()
-            self.codigo = cursor.fetchone()[0]
+            row = cursor.fetchone()
+            if row is not None:
+                self.codigo = row[0]
+            #else:
+            #   raise Exception("No se retornó ningún código desde la base de datos.")

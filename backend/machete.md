@@ -3,6 +3,10 @@ tengo que hacer los routes y los test que me faltan.
 
 para comentar varias lineas a la vez es con ctrl + }
 
+## Permitir ejecucion temporal de scripts para la sesion actual
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
 ## iniciar entorno virtual
 
 .\venv\Scripts\activate

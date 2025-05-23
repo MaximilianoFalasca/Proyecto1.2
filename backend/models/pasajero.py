@@ -38,7 +38,7 @@ class Pasajero(Persona):
                     LEFT JOIN asociado a ON (a.dni=p.dni)
                 WHERE p.dni = (%s)
             """,(dni,))
-            respuesta = cursor.fetchone()
+            respuesta = cursor.fetchall()
             
             return cls(
                 dni=respuesta[0],
@@ -123,6 +123,8 @@ class Pasajero(Persona):
                            (self.dni, self.telefono, self.mail))
 
             conn.commit()
+
+            return self
             
     def puedeVolar(self, fechaSalida, fechaLlegada):
         with get_connection() as conn:

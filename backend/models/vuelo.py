@@ -10,7 +10,7 @@ class Vuelo:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS vuelo(
                     nro INTEGER NOT NULL,
-                    fechaYHoraSalida TIMESTAMP NOT NULL,
+                    fechaYHoraSalida TIMESTAMP NOT NULL,A
                     fechaYHoraLlegada TIMESTAMP NOT NULL,
                     matricula INTEGER NOT NULL,
                     codigoAeropuertoSalida INTEGER NOT NULL,
@@ -109,6 +109,9 @@ class Vuelo:
             """)
             # (self, matricula, fechaFabricacion, capacidad, nombreModelo, nombreMarca)
             respuesta = cursor.fetchone()
+            
+            if not respuesta:
+                return None
             
             avion = Avion(respuesta[0],respuesta[1],respuesta[2],respuesta[3],respuesta[4])
             

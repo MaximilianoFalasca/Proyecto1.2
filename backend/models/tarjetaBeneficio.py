@@ -33,7 +33,11 @@ class TarjetaBeneficio:
                 WHERE b.nroTarjeta = '%s'
             """,(nroTarjeta,))
             beneficio = cursor.fetchone()
-            return cls(nroTarjeta=beneficio[0], puntos=beneficio[1])
+
+            nroTarjeta = beneficio[0] if beneficio is not None else None
+            puntos = beneficio[1] if beneficio is not None else None
+            
+            return cls(nroTarjeta=nroTarjeta, puntos=puntos)
         
     @classmethod
     def actualizarTarjeta(cls, nroTarjeta, puntos):

@@ -1,3 +1,4 @@
+"""Este módulo se encarga de la conexión a la base de datos."""
 import psycopg2
 import os
 

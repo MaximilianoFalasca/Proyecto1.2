@@ -1,10 +1,11 @@
 from flask import Flask
-from datetime import datetime
-from routes import *
-from models import * 
 from flask_cors import CORS
 from dotenv import load_dotenv
+from datetime import datetime
 from pathlib import Path
+
+from .routes import *
+from .models import * 
 
 # Ruta absoluta al .env dentro de config
 env_path = Path(__file__).parent / "config" / ".env"

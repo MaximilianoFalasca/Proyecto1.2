@@ -96,6 +96,8 @@ class Persona:
                     cursor.execute("INSERT INTO asociado (dni, numeroTarjeta) VALUES (%s,%s)", (self.dni, self.numeroTarjeta))
                 
                 conn.commit()
+
+                return self
             
     def agregarTarjeta(self, numeroTarjeta):
         with get_connection() as conn:

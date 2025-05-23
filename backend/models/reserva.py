@@ -197,7 +197,12 @@ class Reserva:
                     VALUES (%s,%s,%s,%s,%s) RETURNING numero""", 
                     (self.dni, self.fecha, self.precio, self.numeroVuelo, self.fechaYHoraSalida)
                 )
-                self.numero = cursor.fetchone()[0]
+                row = cursor.fetchone()
+                if(row):
+                    self.numero = row[0]
+                # else:
+                #       raise error
+
                 # esto no se hace todavia porque no se confirmo el pago, estamos en pending todavia
                 # for asiento in self._asientos:
                 #     if isinstance(asiento, Asiento):
