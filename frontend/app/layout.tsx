@@ -33,7 +33,7 @@ const NAVIGATION_BASE = [
 ];
 
 const BRANDING = {
-  logo: <img src="/imagenes/AR_horiz.svg" alt="Aerolineas Argentinas" width={200} height={200} />,
+  logo: <Image src="/imagenes/AR_horiz.svg" alt="Aerolineas Argentinas" width={200} height={200} />,
   title: '',
 };
 

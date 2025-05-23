@@ -20,6 +20,7 @@ export default function PruebaPage() {
   const fechaSalida = searchParams.get("fechaSalida");
   const [asientos,setAsientos] = React.useState<any | any>(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     async function getAsientos(){
       try{

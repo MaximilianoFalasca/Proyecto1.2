@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSession } from 'next-auth/react';
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 
-export default function HomePage({ user }: { user: any }) {
+export default function HomePage() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const [focusedRegreso, setFocusedRegreso] = useState(false);
   const [focusedIda, setFocusedIda] = useState(false);
   const router = useRouter();
