@@ -101,6 +101,9 @@ web_modules/
 
 # Next.js build output
 .next
+.next/
+next/
+./frontend/next/*
 out
 
 # Nuxt.js build / generate output
