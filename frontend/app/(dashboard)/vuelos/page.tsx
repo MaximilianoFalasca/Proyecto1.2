@@ -33,7 +33,7 @@ export default function OrdersPage() {
     async function obtenerVuelosDB(){
       try {
         const respuesta = await axios.get<Vuelo[]>(`${API_URL}/vuelos`)
-
+        
         setVuelos(respuesta.data)        
       } catch (error) {
         console.log(error)
