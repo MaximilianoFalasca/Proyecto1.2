@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import Asiento
+from ..models import Asiento
 
 Asiento_routes = Blueprint('asiento_routes',__name__)
 
@@ -36,7 +36,7 @@ def registrar_asiento():
     asiento = request.json
     
     if not asiento or not asiento.get('matricula') or not asiento.get('numero') or not asiento.get('precio'):
-        return jsonify({"error": "Faltan datos"}), 
+        return jsonify({"error": "Faltan datos"}) 
     
     try:
         nuevo_asiento = Asiento(**asiento)
@@ -49,6 +49,8 @@ def registrar_asiento():
 def modificar_asiento(numero,matricula):
     datos = request.json
     try:
+        if datos is None:
+            raise ValueError("No se puede hacer un put sin datos")
         Asiento.actualizarAsiento(numero,matricula,datos)
         return jsonify({"mensaje":"Datos de asiento actualizados con exito"}), 201
     except Exception as e:

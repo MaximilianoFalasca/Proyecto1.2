@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request
-from models import Vuelo
+from ..models import Vuelo
 
 Vuelo_routes = Blueprint('vuelo_routes',__name__)
 
 @Vuelo_routes.route('/vuelos/<int:nro>/<string:fechaSalida>', methods=['GET'])
 def obtener_vuelo(nro, fechaSalida):
-    from models import Aeropuerto 
+    from ..models import Aeropuerto 
     try:
         # Convertir la fecha a formato datetime
         from datetime import datetime
@@ -30,7 +30,7 @@ def obtener_vuelo(nro, fechaSalida):
 
 @Vuelo_routes.route('/vuelos', methods=['GET'])
 def obtener_vuelos():
-    from models import Aeropuerto 
+    from ..models import Aeropuerto 
     vuelos = Vuelo.obtenerTodos()
     
     respuesta = []
@@ -100,6 +100,9 @@ def obtener_asientos(nro,fechaSalida):
         vuelo = Vuelo.obtenerVuelo(nro,fecha)
         
         asientos = vuelo.obtenerAsientos()
+
+        if asientos is None:
+            return jsonify([])
         
         return jsonify([
             {

@@ -39,3 +39,5 @@ app.register_blueprint(Asiento_routes)
 app.register_blueprint(Aeropuerto_routes)
 
 # No arranco con app.run porque Render usará gunicorn para producción
+#if __name__ == "__main__":
+#    app.run(debug=True)

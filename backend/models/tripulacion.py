@@ -90,7 +90,7 @@ class Tripulacion(Persona):
     # 2- al finalizar un vuelo se acumulan las horas y se deja el nroVuelo, fechaYHoraSalida y rol vacios
     # hay que ver eso 
     @classmethod
-    def actualizarTripulacion(cls, dni, **datos):
+    def actualizarTripulacion(cls, dni, datos:dict):
         campos_actualizables=["nroVuelo","fechaYHoraSalida","nombre","apellido","horasAcumuladas","rol"]
         
         mensaje="UPDATE tripulacion SET "

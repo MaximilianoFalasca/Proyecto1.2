@@ -21,6 +21,7 @@ pip install -r requirements.txt
 
 ## iniciar el servidor (desde \backend):
 
+python -m backend.app
 python app.py
 
 ## ejecutar los test (desde \Proyecto)

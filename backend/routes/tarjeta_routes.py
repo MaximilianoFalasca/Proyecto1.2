@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import TarjetaBeneficio
+from ..models import TarjetaBeneficio
 
 Tarjeta_routes = Blueprint('tarjeta_routes',__name__)
 
@@ -34,7 +34,7 @@ def registrar_tarjeta():
     tarjeta = request.json
     
     if not tarjeta or not tarjeta.get('nroTarjeta'):
-        return jsonify({"error": "Faltan datos"}), 
+        return jsonify({"error": "Faltan datos"})
     
     try:
         nuevo_avion = TarjetaBeneficio(**tarjeta)
@@ -45,10 +45,13 @@ def registrar_tarjeta():
     
 @Tarjeta_routes.route('/tarjetas/<string:nroTarjeta>', methods=['PUT'])
 def modificar_tarjeta(nroTarjeta):
-    data = request.json
-    puntos = data.get('puntos')
-    
     try:
+        data = request.json
+
+        if data is None:
+            raise ValueError("Los datos para modificar la tarjeta no pueden estar vacios")
+        
+        puntos = data.get('puntos')
         TarjetaBeneficio.actualizarTarjeta(nroTarjeta,puntos)
         return jsonify({"mensaje":"Datos de tarjeta actualizados con exito"}), 201
     except Exception as e:

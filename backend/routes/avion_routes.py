@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import Avion
+from ..models import Avion
 
 Avion_routes = Blueprint('avion_routes',__name__)
 
@@ -42,7 +42,7 @@ def registrar_avion():
     avion = request.json
     
     if not avion or not avion.get('matricula') or not avion.get('fechaFabricacion') or not avion.get('capacidad') or not avion.get('nombreModelo') or not avion.get('nombreMarca'):
-        return jsonify({"error": "Faltan datos"}), 
+        return jsonify({"error": "Faltan datos"})
     
     try:
         nuevo_avion = Avion(**avion)

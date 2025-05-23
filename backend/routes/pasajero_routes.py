@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import Pasajero
+from ..models import Pasajero
 
 Pasajero_routes = Blueprint('pasajero_routes',__name__)
 
@@ -67,6 +67,8 @@ def agregar_tarjeta():
 def modificar_pasajero(dni):
     datos = request.json
     try:
+        if datos is None:
+            raise ValueError("No se puede realizar un put sin datos")
         Pasajero.actualizarPasajero(dni,datos)
         return jsonify({"mensaje":"Datos de pasajero actualizados con exito"}), 201
     except Exception as e:

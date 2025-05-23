@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import Aeropuerto
+from ..models import Aeropuerto
 
 Aeropuerto_routes = Blueprint('aeropuerto_routes',__name__)
 
@@ -38,7 +38,7 @@ def registrar_aeropuerto():
     aeropuerto = request.json
     
     if not aeropuerto or not aeropuerto.get('nombre') or not aeropuerto.get('nombreCiudad') or not aeropuerto.get('nombrePaiz'):
-        return jsonify({"error": "Faltan datos"}), 
+        return jsonify({"error": "Faltan datos"})
     
     try:
         nuevo_aeropuerto = Aeropuerto(**aeropuerto)

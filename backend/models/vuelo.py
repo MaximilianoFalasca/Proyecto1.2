@@ -10,8 +10,8 @@ class Vuelo:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS vuelo(
                     nro INTEGER NOT NULL,
-                    fechaYHoraSalida TIMESTAMP NOT NULL,A
-                    fechaYHoraLlegada TIMESTAMP NOT NULL,
+                    fechaYHoraSalida TIMESTAMP NOT NULL,
+                    fechaYHoraLlegada TIMESTAMP,
                     matricula INTEGER NOT NULL,
                     codigoAeropuertoSalida INTEGER NOT NULL,
                     codigoAeropuertoLlegada INTEGER NOT NULL,
@@ -118,3 +118,15 @@ class Vuelo:
             asientos = avion.obtenerAsientos()
             
             return asientos
+
+    def finalizarVuelo(self):
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                UPDATE vuelo
+                SET fechaYHoraLlegada = NOW
+                WHERE (nro = %s) and (fechaYHoraSalida = %s) 
+            """,(self.nro, self.fechaYHoraSalida))
+
+            conn.commit()

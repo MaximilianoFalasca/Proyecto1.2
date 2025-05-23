@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import Reserva
+from ..models import Reserva
 
 Reserva_routes = Blueprint('reserva_routes',__name__)
 
@@ -44,7 +44,7 @@ def obtener_reservas():
     
 @Reserva_routes.route('/reservas', methods=['POST'])
 def registrar_reserva():
-    from models import Asiento, Persona, Vuelo
+    from ..models import Asiento, Persona, Vuelo
     datos_reserva = request.json
     
     if not datos_reserva or not datos_reserva["dni"] or not datos_reserva["vuelo"] or not datos_reserva["asientos"]:
@@ -67,7 +67,7 @@ def registrar_reserva():
         vuelo = Vuelo.obtenerVuelo(datos_reserva["vuelo"]["nro"], datos_reserva["vuelo"]["fechaYHoraSalida"])
         
         nueva_reserva = persona.sacarReserva(vuelo ,asientos)
-        
+
         return jsonify({
             "message": "Reserva creada exitosamente",
             "reserva": {
@@ -87,9 +87,13 @@ def registrar_reserva():
 
 @Reserva_routes.route('/reservas/<int:numero>/asientos', methods=['PUT'])
 def cambiar_asientos(numero):
-    from models import Asiento
+    from ..models import Asiento
     try:
         datos_asientos = request.json
+
+        if datos_asientos is None:
+            raise ValueError("Los datos para cambiar de asiento no pueden estar vacios")
+        
         asientos = []
         for asiento in datos_asientos["asientos"]:
             if not all (a in asiento for a in ["numero","matricula"]):
@@ -107,7 +111,7 @@ def cambiar_asientos(numero):
 
 @Reserva_routes.route('/reservas/<int:numero>', methods=['PUT'])
 def cambiar_Estado(numero):
-    from models.estados import validarEstado
+    from ..models.estados import validarEstado
     try:
         estado = request.json
         

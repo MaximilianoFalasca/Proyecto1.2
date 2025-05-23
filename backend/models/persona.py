@@ -125,13 +125,13 @@ class Persona:
         from . import Pasajero, Reserva, Vuelo
         
         if not all(isinstance(asiento, Asiento) for asiento in asientos):
-            return ValueError("Los parametros enviados deben ser instancias de Asiento")
+            raise ValueError("Los parametros enviados deben ser instancias de Asiento")
             
         if any(asiento.estaOcupado() for asiento in asientos):
-            return ValueError("Los asientos no deben estar ocupados")
+            raise ValueError("Los asientos no deben estar ocupados")
         
         if not isinstance(vuelo, Vuelo):
-            return ValueError("El vuelo debe ser una instancia de Vuelo")
+            raise ValueError("El vuelo debe ser una instancia de Vuelo")
             
         pasajero = Pasajero.obtenerPasajero(self.dni)
         
