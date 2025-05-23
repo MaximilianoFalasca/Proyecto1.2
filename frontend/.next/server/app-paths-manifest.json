@@ -1,5 +1,0 @@
-{
-  "/(dashboard)/page": "app/(dashboard)/page.js",
-  "/(dashboard)/vuelos/page": "app/(dashboard)/vuelos/page.js",
-  "/(dashboard)/reserva/page": "app/(dashboard)/reserva/page.js"
-}
