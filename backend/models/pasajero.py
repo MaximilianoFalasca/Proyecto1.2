@@ -38,7 +38,7 @@ class Pasajero(Persona):
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE p.dni = (%s)
+                WHERE (p.dni = '%s')
             """,(dni,))
             respuesta = cursor.fetchall()
             
@@ -61,18 +61,18 @@ class Pasajero(Persona):
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE (p.mail = (%s)) and (p.password = (%s))
+                WHERE (p.mail = '%s') and (p.password = '%s')
             """,(mail, password))
             respuesta = cursor.fetchall()
             
             return cls(
-                dni=respuesta[0],
-                telefono=respuesta[1], 
-                mail=respuesta[2], 
-                numeroTarjeta=respuesta[3],
+                apellido=respuesta[6],
                 cuil=respuesta[4], 
+                dni=respuesta[0],
+                mail=respuesta[2], 
                 nombre=respuesta[5], 
-                apellido=respuesta[6]
+                numeroTarjeta=respuesta[3],
+                telefono=respuesta[1], 
             )
             
     @classmethod
