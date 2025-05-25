@@ -13,7 +13,8 @@ class Pasajero(Persona):
                 CREATE TABLE IF NOT EXISTS pasajero(
                     dni INTEGER NOT NULL PRIMARY KEY,
                     telefono INTEGER,
-                    mail TEXT,
+                    mail TEXT UNIQUE,
+                    contraseña TEXT NOT NULL,
                     FOREIGN KEY (dni) REFERENCES persona(dni)
                 )               
             """)
@@ -27,8 +28,9 @@ class Pasajero(Persona):
             cursor.execute("DELETE FROM asociado WHERE dni = (%s)",(dni,))
             conn.commit()
             
+    
     @classmethod
-    def obtenerPasajero(cls, dni):
+    def obtenerPasajero(cls, email, contraseña):
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -36,8 +38,8 @@ class Pasajero(Persona):
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE p.dni = (%s)
-            """,(dni,))
+                WHERE (p.email = (%s)) and (p.contraseña = (%s))
+            """,(email, contraseña))
             respuesta = cursor.fetchall()
             
             return cls(

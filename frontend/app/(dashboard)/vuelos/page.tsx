@@ -30,17 +30,25 @@ export default function OrdersPage() {
   const [vuelos, setVuelos] = useState<Vuelo[] | any>(null)
 
   useEffect(()=>{
+    let isMounted = true;
+    
     async function obtenerVuelosDB(){
       try {
         const respuesta = await axios.get<Vuelo[]>(`${API_URL}/vuelos`)
         
-        setVuelos(respuesta.data)        
+        if (isMounted) {
+          setVuelos(respuesta.data); // solo se llama si sigue montado
+        }        
       } catch (error) {
         console.log(error)
       }
     }
 
     obtenerVuelosDB()
+
+    return () => {
+      isMounted = false; // solo se ejecuta si el componente se desmonta
+    };
   },[])
 
   function obtenerFiltros(){
