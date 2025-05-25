@@ -3,10 +3,10 @@ from ..models import Pasajero
 
 Pasajero_routes = Blueprint('pasajero_routes',__name__)
 
-@Pasajero_routes.route('/pasajeros/<int:dni>', methods=['GET'])
-def obtener_pasajero(dni):
+@Pasajero_routes.route('/pasajeros/<string:email>/<string:contraseña>', methods=['GET'])
+def obtener_pasajero(email,contraseña):
     try:
-        pasajero = Pasajero.obtenerPasajero(dni)
+        pasajero = Pasajero.obtenerPasajero(email, contraseña)
         return jsonify({
             "dni":pasajero.dni, 
             "telefono":pasajero.telefono, 
@@ -57,7 +57,7 @@ def agregar_tarjeta():
         return jsonify({"error":"Faltan datos"}), 400
     
     try:
-        pasajero = Pasajero.obtenerPasajero(datos.get('dni'))
+        pasajero = Pasajero.obtenerPasajeroPorDni(datos.get('dni'))
         pasajero.agregarTarjeta(datos.get('numeroTarjeta'))
         return jsonify({"mensaje":"Tarjeta agregada con exito"}), 201
     except Exception as e:

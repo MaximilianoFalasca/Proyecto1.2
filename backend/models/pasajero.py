@@ -30,6 +30,29 @@ class Pasajero(Persona):
             
     
     @classmethod
+    def obtenerPasajeroPorDni(cls, dni):
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.dni, p.telefono, p.mail, a.numeroTarjeta, pe.cuil, pe.nombre, pe.apellido 
+                FROM pasajero p
+                    INNER JOIN persona pe ON (pe.dni=p.dni)
+                    LEFT JOIN asociado a ON (a.dni=p.dni)
+                WHERE p.dni = (%s)
+            """,(dni,))
+            respuesta = cursor.fetchall()
+            
+            return cls(
+                dni=respuesta[0],
+                telefono=respuesta[1], 
+                mail=respuesta[2], 
+                numeroTarjeta=respuesta[3],
+                cuil=respuesta[4], 
+                nombre=respuesta[5], 
+                apellido=respuesta[6]
+            )
+
+    @classmethod
     def obtenerPasajero(cls, email, contraseña):
         with get_connection() as conn:
             cursor = conn.cursor()
