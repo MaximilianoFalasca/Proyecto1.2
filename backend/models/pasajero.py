@@ -53,7 +53,7 @@ class Pasajero(Persona):
             )
 
     @classmethod
-    def obtenerPasajero(cls, email, password):
+    def obtenerPasajero(cls, mail, password):
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -61,8 +61,8 @@ class Pasajero(Persona):
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE (p.email = (%s)) and (p.password = (%s))
-            """,(email, password))
+                WHERE (p.mail = (%s)) and (p.password = (%s))
+            """,(mail, password))
             respuesta = cursor.fetchall()
             
             return cls(
