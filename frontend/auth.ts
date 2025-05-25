@@ -12,20 +12,13 @@ import axios from 'axios';
 
 //modificar
 interface Usuario {
-  nro: string;
-  fechaYHoraSalida: string;
-  fechaYHoraLlegada: string;
-  matricula: string;
-  aeropuertoSalida: {
-    ciudad: string;
-    nombre: string;
-    pais: string;
-  };
-  aeropuertoLlegada: {
-    ciudad: string;
-    nombre: string;
-    pais: string;
-  };
+  dni: number,
+  cuil: number,
+  nombre: string,
+  apellido: string,
+  telefono: string,
+  mail: string,
+  password: string
 }
 
 //por ahora solo consultamos por pasajeros pero ams adelante tengo que habilitar para la tripulacion
@@ -33,7 +26,7 @@ async function verificarUsuario(email: String, password: String){
   try {
     const respuesta = await axios.get<Usuario[]>(`${API_URL}/pasajeros/${email}/${password}`);
     
-    return respuesta; 
+    return respuesta.data[0]; 
   } catch (error) {
     console.log(error)
     return false;
@@ -52,10 +45,22 @@ const providers: Provider[] = [
       password: { label: 'Password', type: 'password' },
     },
     async authorize(credentials) {
-      // Aca validás con tu DB
-      const user = await verificarUsuario(credentials.email, credentials.password);
+      if (!credentials?.email || !credentials?.password) {
+        return null;
+      }
+
+      const email = credentials.email as string;
+      const password = credentials.password as string;
+
+      const user = await verificarUsuario(email, password);
       if (!user) return null;
-      return user;
+      return {
+        dni: user.dni,
+        name: `${user.nombre} ${user.apellido}`,
+        email: email,
+        telefono: user.telefono,
+        cuil: user.cuil,
+      };
     },
   }),
   /*
