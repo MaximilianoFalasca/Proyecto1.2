@@ -14,7 +14,7 @@ class Pasajero(Persona):
                     dni INTEGER NOT NULL PRIMARY KEY,
                     telefono INTEGER,
                     mail TEXT UNIQUE,
-                    contraseña TEXT NOT NULL,
+                    password TEXT NOT NULL,
                     FOREIGN KEY (dni) REFERENCES persona(dni)
                 )               
             """)
@@ -53,7 +53,7 @@ class Pasajero(Persona):
             )
 
     @classmethod
-    def obtenerPasajero(cls, email, contraseña):
+    def obtenerPasajero(cls, email, password):
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -61,8 +61,8 @@ class Pasajero(Persona):
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE (p.email = (%s)) and (p.contraseña = (%s))
-            """,(email, contraseña))
+                WHERE (p.email = (%s)) and (p.password = (%s))
+            """,(email, password))
             respuesta = cursor.fetchall()
             
             return cls(

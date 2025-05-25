@@ -3,10 +3,10 @@ from ..models import Pasajero
 
 Pasajero_routes = Blueprint('pasajero_routes',__name__)
 
-@Pasajero_routes.route('/pasajeros/<string:email>/<string:contraseña>', methods=['GET'])
-def obtener_pasajero(email,contraseña):
+@Pasajero_routes.route('/pasajeros/<string:email>/<string:password>', methods=['GET'])
+def obtener_pasajero(email,password):
     try:
-        pasajero = Pasajero.obtenerPasajero(email, contraseña)
+        pasajero = Pasajero.obtenerPasajero(email, password)
         return jsonify({
             "dni":pasajero.dni, 
             "telefono":pasajero.telefono, 
