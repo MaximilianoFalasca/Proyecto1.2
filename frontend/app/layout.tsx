@@ -53,8 +53,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       ? [
           {
             kind: 'page' as const,
-            segment: 'historial',
-            title: 'Registro',
+            segment: 'reserva',
+            title: 'Reservas',
             icon: <DashboardIcon />,
           },
         ]

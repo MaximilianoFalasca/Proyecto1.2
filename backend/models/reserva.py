@@ -117,6 +117,38 @@ class Reserva:
             reserva.estado = respuesta[1]
 
             return reserva
+
+    @classmethod
+    def obtenerReservasPorDni(cls, dni):
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                    SELECT r.numero, r.fecha, e.nombreEstado, r.dni, r.numeroVuelo, r.fechaYHoraSalida
+                    FROM reserva r
+                        INNER JOIN esta e ON (e.numeroReserva = r.numero)
+                    WHERE r.dni = (%s)
+                """,(dni,)
+            )
+            respuesta = cursor.fetchall()
+            reservas_con_asientos = []
+            
+            for reserva in respuesta:
+                
+                reserva_nueva = cls(
+                    dni = reserva[3],
+                    numeroVuelo = reserva[4],
+                    fechaYHoraSalida = reserva[5],
+                    asientos = Asiento.asientos_ocupados_por(reserva[0])
+                )
+                
+                reserva_nueva.fecha = reserva[1]
+                reserva_nueva.numero = reserva[0]
+                reserva_nueva.estado = reserva[2]
+                
+                reservas_con_asientos.append(reserva_nueva)
+            
+            return reservas_con_asientos
         
     @classmethod
     def eliminarReserva(cls,numero):

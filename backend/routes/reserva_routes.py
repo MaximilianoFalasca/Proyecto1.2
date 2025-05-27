@@ -22,6 +22,27 @@ def obtener_reserva(numero):
     except Exception as e:
         return jsonify({"error":str(e)}), 400
 
+@Reserva_routes.route('/reservas/<int:dni>', methods=['GET'])
+def obtener_reservas_por_dni(dni):
+    try:
+        # Llamar al método del modelo para obtener el vuelo
+        reservas = Reserva.obtenerReservasPorDni(dni)
+        
+        return jsonify([
+            {
+                "numero" : reserva.numero,
+                "fecha" : reserva.fecha,
+                "estado" : reserva.estado,
+                "asientos": [
+                    {"numero": asiento.numero, "matricula": asiento.matricula, "precio": asiento.precio}
+                    for asiento in reserva.asientos
+                ],
+                "Pasajero":reserva.dni,
+            } for reserva in reservas
+        ])
+    except Exception as e:
+        return jsonify({"error":str(e)}), 400
+
 @Reserva_routes.route('/reservas', methods=['GET'])
 def obtener_reservas():
     try:

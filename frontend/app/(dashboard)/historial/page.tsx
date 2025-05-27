@@ -2,19 +2,37 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import { DataGrid, GridRowsProp, GridColDef,GridFilterModel, GridToolbar } from '@mui/x-data-grid';
+import axios from 'axios';
+import { API_URL } from '@/utils/config'
 import type { Session as AuthSession } from "@auth/core/types";
 
 type Session = AuthSession & {
-  user?: {
-    name?: string | null; 
-    role?: string;
-  };
+  Usuario?: {
+    dni: number,
+    cuil: number,
+    nombre: string,
+    apellido: string,
+    telefono?: string | null,
+    mail: string,
+    password: string
+  }
 };
+
+interface Reserva {
+  numero: number,
+  numeroVuelo: number,
+  fechayhorasalida: Date,
+  fecha: Date,
+  precio: number,
+  dni: number,
+}
 
 export default function HomePage() {
   const [user, setUser] = useState<Session | null>(null)
-  
+  const [historial, setHistorial] = useState<Reserva[] | any>(null)
+
   useEffect(() => {
+    let isMounted = true;
     async function fetchUser() {
         try {
             const response = await fetch('/api/session'); 
@@ -30,51 +48,72 @@ export default function HomePage() {
             setUser(null);
           }
     }
+
+    async function obtenerReservasDeUsuarioDB(){
+      try {
+        const respuesta = await axios.get<Reserva[]>(`${API_URL}/reservas/${user?.Usuario?.dni}`)
+        
+        if (isMounted) {
+          setHistorial(respuesta.data); 
+        }        
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
     fetchUser();
+    obtenerReservasDeUsuarioDB();
+
+    return () => {
+      isMounted = false;
+    };
   },[])
 
+
+interface Reserva {
+  numero: number,
+  numeroVuelo: number,
+  fechayhorasalida: Date,
+  fecha: Date,
+  precio: number,
+  dni: number,
+}
   const columns: GridColDef[] = [
-    { field: 'username', headerName: 'Username', width: 150 },
-    { field: 'age', headerName: 'Age', type: 'number', width: 100 },
+    { field: 'numeroVuelo', headerName: 'Numero', flex: 0.3 },
+    { field: 'fechaYHoraSalida', headerName: 'Salida', flex: 0.8 },
+    { field: 'fechaDeReserva', headerName: 'Llegada', flex: 0.8 },
+    { field: 'precio', headerName: 'Matricula', flex: 0.3 },
+    { field: 'dni', headerName: 'Origen', flex: 1 },
   ];
 
-  const rows: GridRowsProp = [
-    { id: 1, username: '@MUI', age: 20 },
-    { id: 2, username: '@MUI2', age: 30 },
-  ];
+  const rows: GridRowsProp = historial ? historial.map((reserva: Reserva, index: number)=>({
+    id: index + 1,
+    numeroVuelo: reserva.numeroVuelo,
+    fechaYHoraSalida: reserva.fechayhorasalida,
+    fechaDeReserva: reserva.fecha,
+    precio: reserva.precio,
+    dni: reserva.dni,
+  })) : [];
 
-
-  const [filterModel, setFilterModel] = React.useState<GridFilterModel>({
-    items: [
-      {
-        field: 'age',
-        operator: '>',
-        value: '25',
-      },
-    ],
-  });
 
   return (    
     <>
       <Typography>
-        Welcome to Toolpad, {user?.user?.name || 'User'}!
+        Welcome to Toolpad, {user?.Usuario?.nombre || 'User'}!
+
+        HISTORIAL DE RESERVAS:
       </Typography>
       <div>
         <DataGrid
+          loading={historial === null}
+          slotProps={{
+            loadingOverlay: {
+              variant: 'skeleton',
+              noRowsVariant: 'skeleton',
+            }
+          }}
           columns={columns}
           rows={rows}
-          slots={{
-            toolbar: GridToolbar,
-          }}
-          initialState={{
-            filter: {
-              filterModel: {
-                items: [{ field: 'age', operator: '<', value: '25' }],
-              },
-            },
-          }}
-          filterModel={filterModel}
-          onFilterModelChange={(newFilterModel) => setFilterModel(newFilterModel)}
         />
       </div>
     </>

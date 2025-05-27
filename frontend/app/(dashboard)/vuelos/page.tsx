@@ -50,7 +50,7 @@ export default function OrdersPage() {
       isMounted = false; // solo se ejecuta si el componente se desmonta
     };
   },[])
-
+/*
   function obtenerFiltros(){
     let filtros = []
     if (searchParams.get('origen') && searchParams.get('origen') !== '') {
@@ -66,7 +66,7 @@ export default function OrdersPage() {
       filtros.push({ field: 'fechaYHoraLlegada', operator: 'equals', value: searchParams.get('fechaRegreso') })
     }
     return {items: filtros}
-  }
+  }*/
 
   const columns: GridColDef[] = [
     { field: 'nro', headerName: 'Numero', flex: 0.3 },
@@ -103,7 +103,7 @@ export default function OrdersPage() {
           }}
           columns={columns}
           rows={rows}
-          initialState={{
+          /*initialState={{
             filter: {
               filterModel: obtenerFiltros(),  
             },
@@ -113,7 +113,7 @@ export default function OrdersPage() {
           }}
           onRowDoubleClick={(event)=>{
             router.push(`/reserva?numero=${event.row.nro}&fechaSalida=${event.row.fechaYHoraSalida}`)
-          }}
+          }}*/
         />
       </div>
     </>

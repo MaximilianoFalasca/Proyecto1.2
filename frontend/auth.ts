@@ -10,7 +10,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { API_URL } from '@/utils/config';
 import axios from 'axios';
 
-//modificar
+//modificar y hacer un archivo donde pueda almacenar las interfaces
 interface Usuario {
   dni: number,
   cuil: number,
@@ -24,9 +24,9 @@ interface Usuario {
 //por ahora solo consultamos por pasajeros pero ams adelante tengo que habilitar para la tripulacion
 async function verificarUsuario(email: String, password: String){
   try {
-    const respuesta = await axios.get<Usuario[]>(`${API_URL}/pasajeros/${email}/${password}`);
+    const respuesta = await axios.get<Usuario>(`${API_URL}/pasajeros/${email}/${password}`);
     
-    return respuesta.data[0]; 
+    return respuesta.data; 
   } catch (error) {
     console.log(error)
     return false;
