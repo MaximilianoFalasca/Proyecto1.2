@@ -122,15 +122,21 @@ class Reserva:
     def eliminarReserva(cls,numero):
         with get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM reserva WHERE numero = %s",(numero, ))
+            cursor.execute("DELETE FROM esta WHERE numeroReserva = %s",(numero, ))
             cursor.execute("DELETE FROM ocupa WHERE numeroReserva = %s",(numero, ))
+            cursor.execute("DELETE FROM reserva WHERE numero = %s",(numero, ))
             conn.commit()
     
     def _inicializarEstado(self):
         if(self.numero!=None):
             with get_connection() as conn:
                 cursor=conn.cursor()
-                cursor.execute("INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) VALUES (%s,%s,%s,%s)",(self.numero, 'Pending', self.fecha, None))
+                cursor.execute("""
+                    INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) 
+                    VALUES (%s,%s,%s,%s)
+                               """,
+                    (self.numero, 'Pending', self.fecha, None)
+                )
                 conn.commit()
                 self.estado='Pending'
         else:
@@ -190,29 +196,43 @@ class Reserva:
     # tengo que verificar que no se haga varias veces
     def guardar(self):
         if(self.numero==None):
+
             with get_connection() as conn:
                 cursor = conn.cursor()
+
+                print("adsdacaca1")
+                print(self.dni, self.fecha, self.precio, self.numeroVuelo, self.fechaYHoraSalida)
                 cursor.execute("""
                     INSERT INTO reserva (dni, fecha, precio, numeroVuelo, fechaYHoraSalida) 
                     VALUES (%s,%s,%s,%s,%s) RETURNING numero""", 
                     (self.dni, self.fecha, self.precio, self.numeroVuelo, self.fechaYHoraSalida)
                 )
+                print("adsdacaca2")
                 row = cursor.fetchone()
+                print("adsdacaca3")
                 if(row):
                     self.numero = row[0]
-                # else:
-                #       raise error
+                    print(self.numero)
+                else:
+                    print("no me retorno bien el resultado")
 
                 # esto no se hace todavia porque no se confirmo el pago, estamos en pending todavia
                 # for asiento in self._asientos:
                 #     if isinstance(asiento, Asiento):
                 #         asiento.reservar(self.numero)
                 
+                print("adsdacaca4")
                 conn.commit()
+            
             for asiento in self.asientos:
+                print("asdasd12312")
                 if not (asiento.estaRelacionadoCon(self.numero)):
                     asiento.relacionarConReserva(self.numero)
+                else:
+                    raise ValueError(f"El asiento {asiento.numero} ya esta relacionado con una reserva")
+            
             self._inicializarEstado()
+            
             return self       
         else:
             raise ValueError("La reserva ya esta guardada") 
@@ -232,11 +252,8 @@ class Reserva:
         
         with get_connection() as conn:
             cursor = conn.cursor()
-            
-            fecha = datetime.datetime.now()
-            
-            cursor.execute(f"UPDATE esta SET fechaFin = %s WHERE numeroReserva = %s and nombreEstado = %s",(fecha, self.numero, self.estado))
-            cursor.execute("INSERT INTO esta (numeroReserva, nombreEstado, fechaInicio, fechaFin) VALUES (%s,%s,%s,%s)", (self.numero, estado, fecha, None))
+        
+            cursor.execute(f"UPDATE esta SET nombreEstado = %s WHERE numeroReserva = %s",(estado, self.numero))
             
             conn.commit()
             

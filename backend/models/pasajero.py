@@ -1,3 +1,4 @@
+from tkinter import W
 from .conexion import get_connection
 from .persona import Persona
 from .vuelo import Vuelo
@@ -38,10 +39,13 @@ class Pasajero(Persona):
                 FROM pasajero p
                     INNER JOIN persona pe ON (pe.dni=p.dni)
                     LEFT JOIN asociado a ON (a.dni=p.dni)
-                WHERE (p.dni = `%s`)
+                WHERE (p.dni = %s)
             """,(dni,))
-            respuesta = cursor.fetchall()
+            respuesta = cursor.fetchone()
             
+            if respuesta is None:
+                raise ValueError("No se encontró un pasajero con ese DNI")
+
             return cls(
                 dni=respuesta[0],
                 telefono=respuesta[1], 
@@ -63,7 +67,10 @@ class Pasajero(Persona):
                     LEFT JOIN asociado a ON (a.dni=p.dni)
                 WHERE (p.mail = %s) and (p.password = %s)
             """,(mail, password))
-            respuesta = cursor.fetchall()
+            respuesta = cursor.fetchone()
+            
+            if respuesta is None:
+                raise ValueError("No se encontró un pasajero con ese mail y contraseña")
             
             return cls(
                 apellido=respuesta[6],
@@ -156,11 +163,11 @@ class Pasajero(Persona):
             cursor = conn.cursor()
 
             cursor.execute("""
-                SELECT 1
+                SELECT *
                 FROM reserva r 
                     INNER JOIN vuelo v ON (r.numeroVuelo = v.nro AND r.fechaYHoraSalida = v.fechaYHoraSalida)
-                WHERE r.dni = %s AND v.fechaYHoraSalida > NOW()  AND (v.fechaYHoraSalida < %s OR v.fechaYHoraLlegada > %s)
-            """,(self.dni, fechaLlegada, fechaSalida))
+                WHERE r.dni = %s AND %s > NOW()  AND (v.fechaYHoraSalida < %s OR v.fechaYHoraLlegada > %s)
+            """,(self.dni, fechaSalida, fechaLlegada, fechaSalida))
             respuesta = cursor.fetchone()
             
             return respuesta is None

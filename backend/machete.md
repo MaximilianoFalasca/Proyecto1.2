@@ -20,6 +20,7 @@ deactivate
 pip install -r requirements.txt
 
 ## iniciar el servidor (desde \backend):
+## antes hay que descomentar lo de app.run(debug=True)
 
 python -m backend.app
 python app.py

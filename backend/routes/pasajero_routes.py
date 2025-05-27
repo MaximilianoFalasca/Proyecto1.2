@@ -7,6 +7,7 @@ Pasajero_routes = Blueprint('pasajero_routes',__name__)
 def obtener_pasajero(email,password):
     try:
         pasajero = Pasajero.obtenerPasajero(email, password)
+        print("Pasajero encontrado:", pasajero)
         return jsonify({
             "dni":pasajero.dni, 
             "telefono":pasajero.telefono, 

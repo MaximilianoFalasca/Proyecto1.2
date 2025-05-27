@@ -133,13 +133,14 @@ class Persona:
         if not isinstance(vuelo, Vuelo):
             raise ValueError("El vuelo debe ser una instancia de Vuelo")
             
-        pasajero = Pasajero.obtenerPasajero(self.dni)
+        pasajero = Pasajero.obtenerPasajeroPorDni(self.dni)
         
         if not pasajero:    
             pasajero = Pasajero(self.cuil, self.nombre, self.apellido, self.dni).guardar()
         
         if not pasajero.puedeVolar(vuelo.fechaYHoraSalida, vuelo.fechaYHoraLlegada):
             raise ValueError("No se puede sacar la reserva en esas fechas")
+        
         
         reserva = Reserva(self.dni, vuelo.nro, vuelo.fechaYHoraSalida, asientos)
         

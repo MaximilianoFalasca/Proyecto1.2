@@ -61,9 +61,9 @@ def registrar_reserva():
             if not all(a in asiento for a in ["matricula", "numero"]):
                 return jsonify({"error": "Datos de asiento incompletos"}), 400
             asientos.append(Asiento.obtenerAsiento(asiento["numero"],asiento["matricula"]))
-            
+
         persona = Persona.obtenerPersona(datos_reserva["dni"])
-        
+
         vuelo = Vuelo.obtenerVuelo(datos_reserva["vuelo"]["nro"], datos_reserva["vuelo"]["fechaYHoraSalida"])
         
         nueva_reserva = persona.sacarReserva(vuelo ,asientos)

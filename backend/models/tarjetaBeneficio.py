@@ -30,7 +30,7 @@ class TarjetaBeneficio:
             cursor.execute("""
                 SELECT *
                 FROM beneficio b
-                WHERE b.nroTarjeta = '%s'
+                WHERE b.nroTarjeta = %s
             """,(nroTarjeta,))
             beneficio = cursor.fetchone()
 
