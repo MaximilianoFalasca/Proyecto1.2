@@ -111,9 +111,10 @@ export default function OrdersPage() {
           slots={{
             toolbar: GridToolbar, 
           }}
+        */
           onRowDoubleClick={(event)=>{
             router.push(`/reserva?numero=${event.row.nro}&fechaSalida=${event.row.fechaYHoraSalida}`)
-          }}*/
+          }}
         />
       </div>
     </>

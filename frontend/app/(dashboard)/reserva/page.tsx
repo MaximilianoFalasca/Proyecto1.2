@@ -68,10 +68,12 @@ export default function PruebaPage() {
 
   function obtenerObjetosAsientos(){
     console.log("asientos:",asientos)
-    if (!asientos || asientos.length < 4) return <p>Cargando asientos o no hay suficientes disponibles.</p>;
+    //if (!asientos || asientos.length < 4) return <p>Cargando asientos o no hay suficientes disponibles.</p>;
 
-    if (asientos.length < 4) return <p>No hay suficientes asientos disponibles.</p>;
-
+    //if (asientos.length < 4) return <p>No hay suficientes asientos disponibles.</p>;
+    
+    if (asientos.length < 1) return <p>No hay asientos disponibles.</p>;
+    
     const rowsCol1 = []
     const rowsCol2 = []
 

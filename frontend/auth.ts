@@ -123,6 +123,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/auth/signin',
   },
   callbacks: {
+    // Autorización de rutas
     authorized({ auth: session, request: { nextUrl } }) {
       
       const isLoggedIn = !!session?.user;
@@ -135,6 +136,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return false; // Redirect unauthenticated users to login page
       },
+
+    // Este callback se llama cuando se genera el JWT (se ejecuta solo una vez al hacer login)
+    async jwt({ token, user }) {
+      if (user) {
+        token.dni = user.dni;
+        token.cuil = user.cuil;
+        token.telefono = user.telefono;
+      }
+      return token;
+    },
+
+    // Este callback se llama cada vez que se accede a la sesión desde el cliente (React)
+    async session({ session, token }) {
+      session.user.dni = token.dni;
+      session.user.cuil = token.cuil;
+      session.user.telefono = token.telefono;
+      return session;
+    },
   },
 });
   

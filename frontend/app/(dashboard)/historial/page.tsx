@@ -4,19 +4,9 @@ import Typography from '@mui/material/Typography';
 import { DataGrid, GridRowsProp, GridColDef,GridFilterModel, GridToolbar } from '@mui/x-data-grid';
 import axios from 'axios';
 import { API_URL } from '@/utils/config'
-import type { Session as AuthSession } from "@auth/core/types";
 
-type Session = AuthSession & {
-  Usuario?: {
-    dni: number,
-    cuil: number,
-    nombre: string,
-    apellido: string,
-    telefono?: string | null,
-    mail: string,
-    password: string
-  }
-};
+import { useSession } from "next-auth/react";
+
 
 interface Reserva {
   numero: number,
@@ -28,40 +18,30 @@ interface Reserva {
 }
 
 export default function HomePage() {
-  const [user, setUser] = useState<Session | null>(null)
+  const { data: session } = useSession();
   const [historial, setHistorial] = useState<Reserva[] | any>(null)
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchUser() {
-        try {
-            const response = await fetch('/api/session'); 
-            if (response.ok) {
-              const session = await response.json();
-              setUser(session);
-            } else {
-              console.error("Failed to fetch session:", response.statusText);
-              setUser(null);
-            }
-          } catch (error) {
-            console.error("Error fetching session:", error);
-            setUser(null);
-          }
-    }
+
+    console.log("hola")
+    console.log("session:",session)
+    console.log("session:",session.user.name)
+    console.log("dni",session.user.dni)
 
     async function obtenerReservasDeUsuarioDB(){
       try {
-        const respuesta = await axios.get<Reserva[]>(`${API_URL}/reservas/${user?.Usuario?.dni}`)
+        const respuesta = await axios.get<Reserva[]>(`${API_URL}/reservas/${session?.user?.dni}`)
         
         if (isMounted) {
           setHistorial(respuesta.data); 
         }        
       } catch (error) {
+        setHistorial([])
         console.log(error)
       }
     }
 
-    fetchUser();
     obtenerReservasDeUsuarioDB();
 
     return () => {
@@ -99,8 +79,8 @@ interface Reserva {
   return (    
     <>
       <Typography>
-        Welcome to Toolpad, {user?.Usuario?.nombre || 'User'}!
-
+        ¡Bienvenido/a, {session?.user?.name || 'Usuario'}!
+        <br />
         HISTORIAL DE RESERVAS:
       </Typography>
       <div>
