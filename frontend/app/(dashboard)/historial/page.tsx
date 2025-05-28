@@ -24,11 +24,6 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true;
 
-    console.log("hola")
-    console.log("session:",session)
-    console.log("session:",session.user.name)
-    console.log("dni",session.user.dni)
-
     async function obtenerReservasDeUsuarioDB(){
       try {
         const respuesta = await axios.get<Reserva[]>(`${API_URL}/reservas/${session?.user?.dni}`)
