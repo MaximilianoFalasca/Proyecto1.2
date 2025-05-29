@@ -9,17 +9,9 @@ import type { Provider } from 'next-auth/providers';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { API_URL } from '@/utils/config';
 import axios from 'axios';
-
-//modificar y hacer un archivo donde pueda almacenar las interfaces
-interface Usuario {
-  dni: number,
-  cuil: number,
-  nombre: string,
-  apellido: string,
-  telefono: string,
-  mail: string,
-  password: string
-}
+import { Usuario } from '@/types/usuario';
+import { Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
 //por ahora solo consultamos por pasajeros pero ams adelante tengo que habilitar para la tripulacion
 async function verificarUsuario(email: String, password: String){
@@ -44,7 +36,7 @@ const providers: Provider[] = [
       email: { label: 'Email', type: 'email' },
       password: { label: 'Password', type: 'password' },
     },
-    async authorize(credentials) {
+    async authorize(credentials, req) {
       if (!credentials?.email || !credentials?.password) {
         return null;
       }
@@ -54,14 +46,9 @@ const providers: Provider[] = [
 
       const user = await verificarUsuario(email, password);
       if (!user) return null;
-      return {
-        dni: user.dni,
-        name: `${user.nombre} ${user.apellido}`,
-        email: email,
-        telefono: user.telefono,
-        cuil: user.cuil,
-      };
-    },
+      
+      return user;
+    }
   }),
   /*
   Github({
@@ -148,7 +135,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     // Este callback se llama cada vez que se accede a la sesión desde el cliente (React)
-    async session({ session, token }) {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: JWT;
+    }) {
       session.user.dni = token.dni;
       session.user.cuil = token.cuil;
       session.user.telefono = token.telefono;
