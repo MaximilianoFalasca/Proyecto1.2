@@ -119,9 +119,12 @@ export default function OrdersPage() {
           vuelos.length !== 0 &&
           vuelos.map((vuelo: Vuelo, index: number) => (
             <Grid2 key={index} size={{ xs: 12, sm: 6 }} component="div"  onDoubleClick={() => {
-                router.push(`/reserva?numero=${vuelo.nro}&fechaSalida=${vuelo.fechaYHoraSalida}`)
-              }
-            }>
+                console.log(`/reserva?numero=${vuelo.nro}&fechaSalida=${vuelo.fechaYHoraSalida}`)
+
+                const fecha = encodeURIComponent(vuelo.fechaYHoraSalida);
+                router.push(`/reserva?numero=${vuelo.nro}&fechaSalida=${fecha}`);
+              }}
+            >
               <div
                 style={{
                   padding: '1rem',

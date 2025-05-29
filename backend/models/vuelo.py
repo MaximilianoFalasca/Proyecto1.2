@@ -97,26 +97,35 @@ class Vuelo:
             )
             conn.commit()
             
-    # esto no esta obteniendo los asientos??
     def obtenerAsientos(self):
-        from .avion import Avion
+        from .asiento import Asiento
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT a.matricula, a.fechaFabricacion, a.capacidad, a.nombreModelo, a.nombreMarca
+                SELECT a.numero, a.matricula, a.precio, a.habilitado
                 FROM vuelo v
-                    INNER JOIN avion a ON (a.matricula = v.matricula) 
+                    INNER JOIN asiento a ON (a.matricula=v.matricula)
             """)
             # (self, matricula, fechaFabricacion, capacidad, nombreModelo, nombreMarca)
-            respuesta = cursor.fetchone()
-            
-            if not respuesta:
-                return None
-            
-            avion = Avion(respuesta[0],respuesta[1],respuesta[2],respuesta[3],respuesta[4])
-            
-            asientos = avion.obtenerAsientos()
-            
+            respuesta = cursor.fetchall()
+            asientos = []
+            for asiento in respuesta:
+                a = Asiento(asiento[0],asiento[1],asiento[2],asiento[3])
+                
+                estado = "libre"
+                if (a.estaOcupado()):
+                    estado="ocupado"
+                
+                if(not a.habilitado):
+                    estado="inhabilitado"
+                    
+                asientos.append({
+                    'numero': a.numero,
+                    'matricula': a.matricula,
+                    'precio': a.precio,
+                    'estado': estado
+                } )
+                
             return asientos
 
     def finalizarVuelo(self):

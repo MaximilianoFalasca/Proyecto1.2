@@ -16,25 +16,40 @@ interface Asiento{
   estado: string;
 }
 
-export default function PruebaPage() {
+export default function ReservaPage() {
   const searchParams = useSearchParams();
   const numero = searchParams.get("numero");
-  const fechaSalida = searchParams.get("fechaSalida");
+  const fechaSalidaEncoded = searchParams.get("fechaSalida");
+
+  const fechaSalida = fechaSalidaEncoded ? decodeURIComponent(fechaSalidaEncoded) : null;
   const [asientos,setAsientos] = React.useState<any | any>(null)
   const [seleccionados,setSeleccionados] = React.useState<Asiento[]>([])
   const [vuelo,setVuelo] = React.useState<any | any>(null)
 
   React.useEffect(() => {
+    console.log("numero: ",numero)
+    console.log("fechaSalida")
+    console.log(fechaSalida)
     async function getAsientos(){
       try{
-        let fecha = fechaSalida?.split(" ")
-        let fechaProcesada = fecha?.join("T")
+        if (!numero || !fechaSalida) {
+          console.error("Numero de vuelo o fecha de salida no proporcionados.");
+          return;
+        }
 
+        let fechaProcesada = formatoBackend(fechaSalida)
+        console.log(fechaSalida)
+        console.log(fechaProcesada)
+
+        console.log("peticion:",`${API_URL}/vuelos/${numero}/${fechaProcesada}/asientos`)
         let response = await axios.get(`${API_URL}/vuelos/${numero}/${fechaProcesada}/asientos`)
-        
+
         setAsientos(response.data)
 
-        response = await axios.get(`${API_URL}/vuelos/${numero}/${fechaProcesada}`)
+        console.log("asientos luego de peticion:")
+        console.log(asientos)
+
+        response = await axios.get(`${API_URL}/vuelos/${numero}/${fechaSalida}`)
 
         setVuelo(response.data)
       } catch (error) {
@@ -42,8 +57,25 @@ export default function PruebaPage() {
       }
     }
 
+    console.log("inicio peticion")
     getAsientos()
+    console.log("peticion finalizada")
   },[numero, fechaSalida])
+
+  function formatoBackend(fechaStr:string) {
+    const fecha = new Date(fechaStr);
+    
+    // formato esperado: "YYYY-MM-DDTHH:mm:ss"
+    // el padStart rellena al principio con ceros si es necesario
+    const year = fecha.getUTCFullYear();
+    const month = String(fecha.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getUTCDate()).padStart(2, '0');
+    const hours = String(fecha.getUTCHours()).padStart(2, '0');
+    const minutes = String(fecha.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(fecha.getUTCSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  }
 
   function normalizarFecha(fecha:string){
     let fechaNormalizada = new Date(fecha).toLocaleString();
@@ -71,14 +103,16 @@ export default function PruebaPage() {
     //if (!asientos || asientos.length < 4) return <p>Cargando asientos o no hay suficientes disponibles.</p>;
 
     //if (asientos.length < 4) return <p>No hay suficientes asientos disponibles.</p>;
-    
-    if (asientos.length < 1) return <p>No hay asientos disponibles.</p>;
-    
+
+    if (asientos == null || asientos.length < 1) return <p>No hay asientos disponibles.</p>;
+
+    /*
     const rowsCol1 = []
     const rowsCol2 = []
 
     let key = 0
 
+    // esto hay que cambiarlo
     for (let index = 3; index < asientos.length; index+=4) {
       rowsCol1.push(
         <div key={key++} style={{ display: 'flex', flexDirection: 'row'}} >
@@ -148,17 +182,41 @@ export default function PruebaPage() {
           </IconButton>
         </div>
       )
-    }
+        
+      */
 
-  return (
-    <Box style={{ display: 'flex', justifyContent: 'space-around', alignItems:'center', flex: 1 }}>
-      <div style={{ display: 'flex', flexDirection: 'column'}}>
-        {rowsCol1}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column'}}>
-        {rowsCol2}
-      </div>
-    </Box>
+    let rows = []  
+
+    let key = 0
+
+    for (let index = 0; index < asientos.length; index++) {
+      rows.push(
+        <div key={key++} style={{ display: 'flex', flexDirection: 'row'}} >
+          <IconButton 
+            key={index} 
+            disabled={asientos[index].estado=="inhabilitado" || asientos[index].estado=="ocupado"} 
+            disableRipple={true} 
+            data-numero={asientos[index].numero} 
+            data-matricula={asientos[index].matricula} 
+            data-precio={asientos[index].precio} 
+            onClick={(e) => seleccionAsiento(asientos[index])}
+          >
+            <CustomIcon 
+              color={asientos[index].estado=="libre"?"disabled":asientos[index].estado=="inhabilitado" || asientos[index].estado=="ocupado"?"error":"primary"}
+              fontSize='large'
+            />
+          </IconButton>
+        </div>
+      )
+    }
+  
+
+    return (
+      <Box style={{ display: 'flex', justifyContent: 'space-around', alignItems:'center', flex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'column'}}>
+          {rows}
+        </div>
+      </Box>
     )
   }
 
