@@ -105,7 +105,8 @@ class Vuelo:
                 SELECT a.numero, a.matricula, a.precio, a.habilitado
                 FROM vuelo v
                     INNER JOIN asiento a ON (a.matricula=v.matricula)
-            """)
+                WHERE v.matricula = %s
+            """, (self.matricula,))
             # (self, matricula, fechaFabricacion, capacidad, nombreModelo, nombreMarca)
             respuesta = cursor.fetchall()
             asientos = []
