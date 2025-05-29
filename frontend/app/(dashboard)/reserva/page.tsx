@@ -104,7 +104,7 @@ export default function ReservaPage() {
 
     //if (asientos.length < 4) return <p>No hay suficientes asientos disponibles.</p>;
 
-    if (asientos == null || asientos.length < 1) return <p>No hay asientos disponibles.</p>;
+    if (!Array.isArray(asientos) || asientos.length < 1) return <p>No hay asientos disponibles.</p>;
 
     /*
     const rowsCol1 = []
